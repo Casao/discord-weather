@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "start": "node index.js",
+    "build": "tsc",
+    "watch": "tsc -w"
   },
   "author": "",
   "engines": {
@@ -17,5 +19,12 @@
     "dark-sky": "^1.1.2",
     "discord.js": "^11.3.0",
     "zipcodes": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/dotenv": "^4.0.2",
+    "@types/node": "^9.4.6",
+    "@types/zipcodes": "^6.0.0",
+    "dotenv": "^5.0.0",
+    "typescript": "^2.7.2"
   }
 }
