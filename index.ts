@@ -1,5 +1,3 @@
-require('dotenv').config()
-
 import { Client as DiscordClient, RichEmbed as DiscordRichEmbed } from "discord.js";
 import { lookup as lookupByZip, lookupByCoords, lookupByName } from "zipcodes";
 
