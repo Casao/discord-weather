@@ -55,6 +55,8 @@ function retrieveLocation(str: string): Location | undefined {
     let cityStateMatch = str.match(/\.wz\b(\w+),\s*(\w+)\b/);
     if (cityStateMatch) {
       let [_, city, state] = cityStateMatch;
+      console.log(city);
+      console.log(state);
       let { latitude, longitude } = lookupByName(city, state)[0];
       return { latitude, longitude, city, state }
     }
