@@ -1,5 +1,6 @@
-import { Client as DiscordClient, RichEmbed as DiscordRichEmbed } from "discord.js";
+import { Client as DiscordClient, RichEmbed as DiscordRichEmbed, TextChannel, Channel, DMChannel, GroupDMChannel } from "discord.js";
 import { lookup as lookupByZip, lookupByCoords, lookupByName } from "zipcodes";
+import { createClient } from "then-redis";
 
 const DarkSky = require('dark-sky');
 
@@ -8,6 +9,8 @@ const token = process.env['DISCORD_KEY'];
 const darksky = new DarkSky(process.env.DARK_SKY_KEY);
 const client = new DiscordClient();
 
+const redis = createClient(process.env['REDIS_URL'])
+
 client.on('ready', () => {
   console.log('I am ready!');
 });
@@ -15,28 +18,44 @@ client.on('ready', () => {
 client.on('message', message => {
   if (message.content.match('.wz')) {
     let location = retrieveLocation(message.content);
-    if (!location) { return; }
-    let { latitude, longitude, city, state } = location;
-    if (latitude && longitude && city && state) {
-      darksky.latitude(latitude)
-        .longitude(longitude)
-        .exclude('minutely')
-        .get()
-        .then(weather => {
-          const url = `https://darksky.net/forecast/${latitude},${longitude}/us12/en`
-          const embed = new DiscordRichEmbed();
-          embed.setTitle(`Weather for ${city}, ${state}`)
-          embed.setURL(url)
-          embed.addField('Temperature', `${weather.currently.temperature}°F`, true)
-          embed.addField('Humidity', `${weather.currently.humidity * 100}%`, true)
-          embed.addField('Conditions', weather.currently.summary, false)
-          embed.addField('Forecast', weather.hourly.summary, false)
-          message.channel.send('', { embed })
-        })
-        .catch(console.log)
+    let channel = message.channel;
+    let userId = message.author.id;
+    if (location) {
+      if (message.content.match('--save')) {
+        storeUserLocation(userId, location);
+      }
+      return buildAndSendWeather(location, channel);
+    }
+    else {
+      retrieveUserLocation(userId).then(res => {
+        return buildAndSendWeather(res, channel);
+      }).catch(err => {
+        return console.log(err);
+      });
     }
   }
 })
+
+function buildAndSendWeather({ latitude, longitude, city, state }: Location, channel: TextChannel | DMChannel | GroupDMChannel): void {
+  if (latitude && longitude && city && state) {
+    darksky.latitude(latitude)
+      .longitude(longitude)
+      .exclude('minutely')
+      .get()
+      .then(weather => {
+        const url = `https://darksky.net/forecast/${latitude},${longitude}/us12/en`
+        const embed = new DiscordRichEmbed();
+        embed.setTitle(`Weather for ${city}, ${state}`)
+        embed.setURL(url)
+        embed.addField('Temperature', `${weather.currently.temperature}°F`, true)
+        embed.addField('Humidity', `${weather.currently.humidity * 100}%`, true)
+        embed.addField('Conditions', weather.currently.summary, false)
+        embed.addField('Forecast', weather.hourly.summary, false)
+        channel.send('', { embed })
+      })
+      .catch(console.log)
+  }
+}
 
 function retrieveLocation(str: string): Location | undefined {
   try {
@@ -62,6 +81,14 @@ function retrieveLocation(str: string): Location | undefined {
   } catch (ex) {
     return undefined
   }
+}
+
+function retrieveUserLocation(userId: string): Promise<Location> {
+  return redis.hgetall(userId);
+}
+
+function storeUserLocation(userId: string, location: Location): void {
+  redis.hmset(userId, location);
 }
 
 interface Location {

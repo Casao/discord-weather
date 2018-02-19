@@ -2,40 +2,55 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const discord_js_1 = require("discord.js");
 const zipcodes_1 = require("zipcodes");
+const then_redis_1 = require("then-redis");
 const DarkSky = require('dark-sky');
 const token = process.env['DISCORD_KEY'];
 const darksky = new DarkSky(process.env.DARK_SKY_KEY);
 const client = new discord_js_1.Client();
+const redis = then_redis_1.createClient(process.env['REDIS_URL']);
 client.on('ready', () => {
     console.log('I am ready!');
 });
 client.on('message', message => {
     if (message.content.match('.wz')) {
         let location = retrieveLocation(message.content);
-        if (!location) {
-            return;
+        let channel = message.channel;
+        let userId = message.author.id;
+        if (location) {
+            if (message.content.match('--save')) {
+                storeUserLocation(userId, location);
+            }
+            return buildAndSendWeather(location, channel);
         }
-        let { latitude, longitude, city, state } = location;
-        if (latitude && longitude && city && state) {
-            darksky.latitude(latitude)
-                .longitude(longitude)
-                .exclude('minutely')
-                .get()
-                .then(weather => {
-                const url = `https://darksky.net/forecast/${latitude},${longitude}/us12/en`;
-                const embed = new discord_js_1.RichEmbed();
-                embed.setTitle(`Weather for ${city}, ${state}`);
-                embed.setURL(url);
-                embed.addField('Temperature', `${weather.currently.temperature}°F`, true);
-                embed.addField('Humidity', `${weather.currently.humidity * 100}%`, true);
-                embed.addField('Conditions', weather.currently.summary, false);
-                embed.addField('Forecast', weather.hourly.summary, false);
-                message.channel.send('', { embed });
-            })
-                .catch(console.log);
+        else {
+            retrieveUserLocation(userId).then(res => {
+                return buildAndSendWeather(res, channel);
+            }).catch(err => {
+                return console.log(err);
+            });
         }
     }
 });
+function buildAndSendWeather({ latitude, longitude, city, state }, channel) {
+    if (latitude && longitude && city && state) {
+        darksky.latitude(latitude)
+            .longitude(longitude)
+            .exclude('minutely')
+            .get()
+            .then(weather => {
+            const url = `https://darksky.net/forecast/${latitude},${longitude}/us12/en`;
+            const embed = new discord_js_1.RichEmbed();
+            embed.setTitle(`Weather for ${city}, ${state}`);
+            embed.setURL(url);
+            embed.addField('Temperature', `${weather.currently.temperature}°F`, true);
+            embed.addField('Humidity', `${weather.currently.humidity * 100}%`, true);
+            embed.addField('Conditions', weather.currently.summary, false);
+            embed.addField('Forecast', weather.hourly.summary, false);
+            channel.send('', { embed });
+        })
+            .catch(console.log);
+    }
+}
 function retrieveLocation(str) {
     try {
         const zipMatch = str.match(/\b\d{5}\b/);
@@ -61,6 +76,12 @@ function retrieveLocation(str) {
     catch (ex) {
         return undefined;
     }
+}
+function retrieveUserLocation(userId) {
+    return redis.hgetall(userId);
+}
+function storeUserLocation(userId, location) {
+    redis.hmset(userId, location);
 }
 // Log our bot in
 client.login(token);
