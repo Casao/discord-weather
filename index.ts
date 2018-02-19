@@ -39,25 +39,29 @@ client.on('message', message => {
 })
 
 function retrieveLocation(str: string): Location | undefined {
-  const zipMatch = str.match(/\b\d{5}\b/)
-  if (zipMatch) {
-    const zip = zipMatch[0]
-    let { latitude, longitude, city, state } = lookupByZip(zip)
-    return { latitude, longitude, city, state }
+  try {
+    const zipMatch = str.match(/\b\d{5}\b/)
+    if (zipMatch) {
+      const zip = zipMatch[0]
+      let { latitude, longitude, city, state } = lookupByZip(zip)
+      return { latitude, longitude, city, state }
+    }
+    let latlongMatch = str.match(/\b(\-?\d+\.\d+?),\s*(\-?\d+\.\d+?)\b/)
+    if (latlongMatch) {
+      let [_, latitude, longitude] = latlongMatch
+      let { city, state } = lookupByCoords(Number(latitude), Number(longitude))
+      return { latitude: Number(latitude), longitude: Number(longitude), city, state }
+    }
+    let cityStateMatch = str.match(/\b(\w+),\s*(\w+)\b/);
+    if (cityStateMatch) {
+      let [_, city, state] = cityStateMatch;
+      let { latitude, longitude } = lookupByName(city, state)[0];
+      return { latitude, longitude, city, state }
+    }
+    return undefined
+  } catch (ex) {
+    return undefined
   }
-  let latlongMatch = str.match(/\b(\-?\d+\.\d+?),\s*(\-?\d+\.\d+?)\b/)
-  if (latlongMatch) {
-    let [_, latitude, longitude] = latlongMatch
-    let { city, state } = lookupByCoords(Number(latitude), Number(longitude))
-    return { latitude: Number(latitude), longitude: Number(longitude), city, state }
-  }
-  let cityStateMatch = str.match(/\b(\w+),\s*(\w+)\b/);
-  if (cityStateMatch) {
-    let [_, city, state] = cityStateMatch;
-    let { latitude, longitude } = lookupByName(city, state)[0];
-    return { latitude, longitude, city, state }
-  }
-  return undefined
 }
 
 interface Location {
