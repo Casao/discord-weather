@@ -52,11 +52,9 @@ function retrieveLocation(str: string): Location | undefined {
       let { city, state } = lookupByCoords(Number(latitude), Number(longitude))
       return { latitude: Number(latitude), longitude: Number(longitude), city, state }
     }
-    let cityStateMatch = str.match(/\.wz\b([\w\s]+),\s*(\w+)\b/);
+    let cityStateMatch = str.match(/\.wz\s([\w\s]+),\s*(\w+)\b/);
     if (cityStateMatch) {
       let [_, city, state] = cityStateMatch;
-      console.log(city);
-      console.log(state);
       let { latitude, longitude } = lookupByName(city, state)[0];
       return { latitude, longitude, city, state }
     }
