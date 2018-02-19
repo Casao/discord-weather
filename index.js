@@ -50,7 +50,7 @@ function retrieveLocation(str) {
             let { city, state } = zipcodes_1.lookupByCoords(Number(latitude), Number(longitude));
             return { latitude: Number(latitude), longitude: Number(longitude), city, state };
         }
-        let cityStateMatch = str.match(/\.wz\b(\w+),\s*(\w+)\b/);
+        let cityStateMatch = str.match(/\.wz\b([\w\s]+),\s*(\w+)\b/);
         if (cityStateMatch) {
             let [_, city, state] = cityStateMatch;
             console.log(city);
