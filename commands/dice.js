@@ -11,25 +11,34 @@ class DiceCommand {
         return message.content.startsWith('.roll') || message.content.startsWith('.dice');
     }
     runCommand(message) {
-        const dice = message.content.match(/\d+d\d+/g);
+        const dice = message.content.match(/(?:\d+)?d(?:\d+)(?:\+\d+)?/g);
         const embed = new discord_js_1.RichEmbed();
         embed.setTitle("Dice Results");
         embed.setColor("#663399");
         dice.forEach(die => {
-            let [quantity, size] = die.split('d');
+            const split = die.match(/(\d+)?d(\d+)(\+\d+)?/);
+            const quantity = Number(split[1]) || 1;
+            const size = Number(split[2]);
+            const plus = Number(split[3]) || 0;
             let dieResults = [];
-            lodash_times_1.default(+quantity, () => {
-                dieResults.push(lodash_random_1.default(1, +size));
+            lodash_times_1.default(quantity, () => {
+                dieResults.push(lodash_random_1.default(1, size));
             });
-            let expAvg = expectedAverage(+size);
-            embed.addField(die, `**[**${dieResults.join(', ')}**]**\n*Average Result:* ${avg(dieResults).toPrecision(2)}\n*Expected Average:* ${expAvg}`);
+            let expAvg = expectedAverage(size);
+            embed.addField(die, `**[**${dieResults.join(', ')}**]**
+            *Sum:* ${sum(dieResults) + plus}
+            *Average Result:* ${avg(dieResults).toPrecision(2)}
+            *Expected Average:* ${expAvg}`);
         });
         message.channel.send('', { embed });
     }
 }
 exports.DiceCommand = DiceCommand;
+function sum(numbers) {
+    return numbers.reduce((prev, curr) => prev + curr, 0);
+}
 function avg(numbers) {
-    return numbers.reduce((prev, curr) => prev + curr, 0) / numbers.length;
+    return sum(numbers) / numbers.length;
 }
 function expectedAverage(size) {
     const fraction = (1 / size);

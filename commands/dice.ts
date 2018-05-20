@@ -10,25 +10,35 @@ export class DiceCommand implements BotCommand {
     }
     
     runCommand(message: Message): void {
-        const dice = message.content.match(/\d+d\d+/g);
+        const dice = message.content.match(/(?:\d+)?d(?:\d+)(?:\+\d+)?/g);
         const embed = new DiscordRichEmbed();
         embed.setTitle("Dice Results");
         embed.setColor("#663399");
         dice.forEach(die => {
-            let [quantity, size] = die.split('d');
+            const split = die.match(/(\d+)?d(\d+)(\+\d+)?/);
+            const quantity = Number(split[1]) || 1;
+            const size = Number(split[2]);
+            const plus = Number(split[3]) || 0;
             let dieResults = []
-            times(+quantity, () => {
-                dieResults.push(random(1, +size));
+            times(quantity, () => {
+                dieResults.push(random(1, size));
             })
-            let expAvg = expectedAverage(+size);
-            embed.addField(die, `**[**${ dieResults.join(', ') }**]**\n*Average Result:* ${ avg(dieResults).toPrecision(2) }\n*Expected Average:* ${ expAvg }`);
+            let expAvg = expectedAverage(size);
+            embed.addField(die, `**[**${ dieResults.join(', ') }**]**
+            *Sum:* ${ sum(dieResults) + plus }
+            *Average Result:* ${ avg(dieResults).toPrecision(2) }
+            *Expected Average:* ${ expAvg }`);
         })
         message.channel.send('', { embed });
     }
 }
 
+function sum(numbers: number[]): number {
+    return numbers.reduce((prev, curr) => prev + curr, 0)
+}
+
 function avg(numbers: number[]): number {
-    return numbers.reduce((prev, curr) => prev + curr, 0) / numbers.length;
+    return sum(numbers) / numbers.length;
 }
 
 function expectedAverage(size: number): number {
