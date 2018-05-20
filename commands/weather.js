@@ -41,6 +41,7 @@ function buildAndSendWeather({ latitude, longitude, city, state }, channel) {
             const embed = new discord_js_1.RichEmbed();
             embed.setTitle(`Weather for ${city}, ${state}`);
             embed.setURL(url);
+            embed.setColor("#663399");
             embed.addField('Temperature', `${weather.currently.temperature}°F`, true);
             embed.addField('Humidity', `${weather.currently.humidity * 100}%`, true);
             embed.addField('Conditions', weather.currently.summary, false);
