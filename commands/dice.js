@@ -26,9 +26,9 @@ class DiceCommand {
             });
             let expAvg = expectedAverage(size);
             embed.addField(die, `**[**${dieResults.join(', ')}**]**
-            *Sum:* ${sum(dieResults) + plus}
-            *Average Result:* ${avg(dieResults).toPrecision(2)}
-            *Expected Average:* ${expAvg}`);
+      *Sum:* ${sum(dieResults) + plus}
+      *Average Result:* ${avg(dieResults).toPrecision(2)}
+      *Expected Average:* ${expAvg}`);
         });
         message.channel.send('', { embed });
     }
