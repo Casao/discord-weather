@@ -62,7 +62,8 @@ function retrieveLocation(str) {
         let latlongMatch = str.match(/\b(\-?\d+\.\d+?),\s*(\-?\d+\.\d+?)\b/);
         if (latlongMatch) {
             let [_, latitude, longitude] = latlongMatch;
-            let { city, state } = zipcodes_1.lookupByCoords(Number(latitude), Number(longitude));
+            let zip = zipcodes_1.lookupByCoords(Number(latitude), Number(longitude));
+            let { city, state } = zipcodes_1.lookup(zip);
             return { latitude: Number(latitude), longitude: Number(longitude), city, state };
         }
         let cityStateMatch = str.match(/\.wz\s([\w\s]+),\s*(\w+)\b/);

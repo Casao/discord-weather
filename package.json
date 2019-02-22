@@ -16,24 +16,24 @@
   },
   "license": "ISC",
   "dependencies": {
-    "dark-sky": "^1.1.2",
-    "discord.js": "^11.3.0",
+    "dark-sky": "^1.1.5",
+    "discord.js": "^11.4.2",
     "lodash.random": "^3.2.0",
     "lodash.sample": "^4.2.1",
     "lodash.times": "^4.3.2",
     "redis": "^2.8.0",
     "then-redis": "^2.0.1",
-    "zipcodes": "^6.0.0"
+    "zipcodes": "^6.1.0"
   },
   "devDependencies": {
-    "@types/lodash.random": "^3.2.3",
-    "@types/lodash.times": "^4.3.3",
-    "@types/lodash.sample": "^4.2.3",
-    "@types/dotenv": "^4.0.2",
-    "@types/node": "^9.4.6",
-    "@types/redis": "^2.8.5",
-    "@types/zipcodes": "^6.0.0",
-    "dotenv": "^5.0.0",
-    "typescript": "^2.7.2"
+    "@types/dotenv": "^4.0.3",
+    "@types/lodash.random": "^3.2.5",
+    "@types/lodash.sample": "^4.2.5",
+    "@types/lodash.times": "^4.3.5",
+    "@types/node": "^9.6.42",
+    "@types/redis": "^2.8.10",
+    "@types/zipcodes": "^6.1.0",
+    "dotenv": "^5.0.1",
+    "typescript": "^2.9.2"
   }
 }
