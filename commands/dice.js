@@ -45,3 +45,4 @@ function expectedAverage(size) {
     const numbers = [...Array(size).keys()].map(v => v + 1);
     return numbers.reduce((prev, curr) => prev + (curr * fraction), 0);
 }
+//# sourceMappingURL=dice.js.map

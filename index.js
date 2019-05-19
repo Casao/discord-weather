@@ -1,12 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+if (process.env.NODE_ENV !== 'production') {
+    require('dotenv').config();
+}
 const discord_js_1 = require("discord.js");
 const weather_1 = require("./commands/weather");
 const decide_1 = require("./commands/decide");
 const dice_1 = require("./commands/dice");
-if (process.env.NODE_ENV !== 'production') {
-    require('dotenv').config();
-}
 const token = process.env['DISCORD_KEY'];
 const client = new discord_js_1.Client();
 client.on('ready', () => {
@@ -22,3 +22,4 @@ client.on('message', message => {
 });
 // Log our bot in
 client.login(token);
+//# sourceMappingURL=index.js.map

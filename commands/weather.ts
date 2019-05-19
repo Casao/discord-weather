@@ -1,13 +1,19 @@
-import { lookup as lookupByZip, lookupByCoords, lookupByName } from "zipcodes";
 import { createClient } from "then-redis";
 import { Message, RichEmbed as DiscordRichEmbed, TextChannel, Channel, DMChannel, GroupDMChannel  } from "discord.js";
+import node_geocoder from "node-geocoder";
 
 import { BotCommand } from "./bot_command";
 
 const DarkSky = require('dark-sky');
+const google_key = process.env.GOOGLE_KEY;
 
 const darksky = new DarkSky(process.env.DARK_SKY_KEY);
-const redis = createClient(process.env['REDIS_URL']);
+const redis = createClient(process.env.REDIS_URL);
+
+const geocoder = node_geocoder({
+  provider: "google",
+  apiKey: google_key
+});
 
 export class WeatherCommand implements BotCommand {
   shouldRun(message: Message): Boolean {
@@ -15,27 +21,28 @@ export class WeatherCommand implements BotCommand {
   }
 
   runCommand(message: Message): void {
-    let location = retrieveLocation(message.content);
     let channel = message.channel;
     let userId = message.author.id;
-    if (location) {
-      if (message.content.match('--save')) {
-        storeUserLocation(userId, location);
+    retrieveLocation(message.content).then((location) => {
+      if (location) {
+        if (message.content.match('--save')) {
+          storeUserLocation(userId, location);
+        }
+        return buildAndSendWeather(location, channel);
       }
-      return buildAndSendWeather(location, channel);
-    }
-    else {
+    }, (reason) => {
+      console.log(reason);
       retrieveUserLocation(userId).then(res => {
         return buildAndSendWeather(res, channel);
       }).catch(err => {
         return console.log(err);
       });
-    }
+    });
   }
 }
 
-function buildAndSendWeather({ latitude, longitude, city, state }: Location, channel: TextChannel | DMChannel | GroupDMChannel): void {
-  if (latitude && longitude && city && state) {
+function buildAndSendWeather({ latitude, longitude, formatted }: Location, channel: TextChannel | DMChannel | GroupDMChannel): void {
+  if (latitude && longitude && formatted) {
     darksky.latitude(latitude)
     .longitude(longitude)
     .exclude('minutely')
@@ -43,11 +50,11 @@ function buildAndSendWeather({ latitude, longitude, city, state }: Location, cha
     .then(weather => {
       const url = `https://darksky.net/forecast/${latitude},${longitude}/us12/en`
       const embed = new DiscordRichEmbed();
-      embed.setTitle(`Weather for ${city}, ${state}`)
+      embed.setTitle(`Weather for ${formatted}`)
       embed.setURL(url)
       embed.setColor("#663399");
       embed.addField('Temperature', `${weather.currently.temperature}°F`, true)
-      embed.addField('Humidity', `${weather.currently.humidity * 100}%`, true)
+      embed.addField('Humidity', `${Math.floor(weather.currently.humidity * 100)}%`, true)
       embed.addField('Conditions', weather.currently.summary, false)
       embed.addField('Forecast', weather.hourly.summary, false)
       channel.send('', { embed })
@@ -56,31 +63,27 @@ function buildAndSendWeather({ latitude, longitude, city, state }: Location, cha
   }
 }
 
-function retrieveLocation(str: string): Location | undefined {
-  try {
-    const zipMatch = str.match(/\b\d{5}\b/)
-    if (zipMatch) {
-      const zip = zipMatch[0]
-      let { latitude, longitude, city, state } = lookupByZip(zip)
-      return { latitude, longitude, city, state }
-    }
-    let latlongMatch = str.match(/\b(\-?\d+\.\d+?),\s*(\-?\d+\.\d+?)\b/)
-    if (latlongMatch) {
-      let [_, latitude, longitude] = latlongMatch
-      let zip = lookupByCoords(Number(latitude), Number(longitude))
-      let { city, state } = lookupByZip(zip)
-      return { latitude: Number(latitude), longitude: Number(longitude), city, state }
-    }
-    let cityStateMatch = str.match(/\.wz\s([\w\s]+),\s*(\w+)\b/);
-    if (cityStateMatch) {
-      let [_, city, state] = cityStateMatch;
-      let { latitude, longitude } = lookupByName(city, state)[0];
-      return { latitude, longitude, city, state }
-    }
-    return undefined
-  } catch (ex) {
-    return undefined
-  }
+function retrieveLocation(str: string): Promise<void | Location> {
+
+  return new Promise((resolve, reject) => {
+    const query = str.slice(4).replace('--save', '');
+
+    return geocoder.geocode(query).then((location) => {
+      if (location.length >= 1) {
+        const loc = location[0];
+        resolve({
+          latitude: loc.latitude,
+          longitude: loc.longitude,
+          formatted: loc.formattedAddress
+        })
+      } else {
+        reject('No Geo results');
+      };
+    }, (err) => {
+      console.log(err);
+      reject(err);
+    });
+  })
 }
 
 function retrieveUserLocation(userId: string): Promise<Location> {
@@ -94,6 +97,5 @@ function storeUserLocation(userId: string, location: Location): void {
 interface Location {
   latitude: number,
   longitude: number,
-  city: string,
-  state: string
+  formatted: string
 }
