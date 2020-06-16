@@ -21,7 +21,7 @@
     "lodash.random": "^3.2.0",
     "lodash.sample": "^4.2.1",
     "lodash.times": "^4.3.2",
-    "node-geocoder": "^3.22.0",
+    "node-geocoder": "^3.27.0",
     "redis": "^2.8.0",
     "then-redis": "^2.0.1",
     "zipcodes": "^6.1.0"
@@ -31,7 +31,7 @@
     "@types/lodash.random": "^3.2.6",
     "@types/lodash.sample": "^4.2.6",
     "@types/lodash.times": "^4.3.6",
-    "@types/node": "^9.6.42",
+    "@types/node": "^9.6.56",
     "@types/node-geocoder": "^3.19.1",
     "@types/redis": "^2.8.12",
     "@types/typescript": "^2.0.0",

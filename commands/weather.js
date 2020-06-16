@@ -3,16 +3,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.WeatherCommand = void 0;
 const then_redis_1 = require("then-redis");
 const discord_js_1 = require("discord.js");
 const node_geocoder_1 = __importDefault(require("node-geocoder"));
 const DarkSky = require('dark-sky');
-const google_key = process.env.GOOGLE_KEY;
+const openmapquest_key = process.env.OPENMAPQUEST_KEY;
 const darksky = new DarkSky(process.env.DARK_SKY_KEY);
 const redis = then_redis_1.createClient(process.env.REDIS_URL);
 const geocoder = node_geocoder_1.default({
-    provider: "google",
-    apiKey: google_key
+    provider: "openmapquest",
+    apiKey: openmapquest_key
 });
 class WeatherCommand {
     shouldRun(message) {
@@ -53,6 +54,7 @@ function buildAndSendWeather({ latitude, longitude, formatted }, channel) {
             embed.setColor("#663399");
             embed.addField('Temperature', `${weather.currently.temperature}°F`, true);
             embed.addField('Humidity', `${Math.floor(weather.currently.humidity * 100)}%`, true);
+            embed.addField('High', `$(weather.daily.data[0].temperatureHigh}°F`, false);
             embed.addField('Conditions', weather.currently.summary, false);
             embed.addField('Forecast', weather.hourly.summary, false);
             channel.send('', { embed });
@@ -66,10 +68,11 @@ function retrieveLocation(str) {
         return geocoder.geocode(query).then((location) => {
             if (location.length >= 1) {
                 const loc = location[0];
+                const formatted = `${loc.city}, ${loc.state}, ${loc.zipcode}`;
                 resolve({
                     latitude: loc.latitude,
                     longitude: loc.longitude,
-                    formatted: loc.formattedAddress
+                    formatted: formatted
                 });
             }
             else {

@@ -5,14 +5,14 @@ import node_geocoder from "node-geocoder";
 import { BotCommand } from "./bot_command";
 
 const DarkSky = require('dark-sky');
-const google_key = process.env.GOOGLE_KEY;
+const openmapquest_key = process.env.OPENMAPQUEST_KEY;
 
 const darksky = new DarkSky(process.env.DARK_SKY_KEY);
 const redis = createClient(process.env.REDIS_URL);
 
 const geocoder = node_geocoder({
-  provider: "google",
-  apiKey: google_key
+  provider: "openmapquest",
+  apiKey: openmapquest_key
 });
 
 export class WeatherCommand implements BotCommand {
@@ -55,6 +55,7 @@ function buildAndSendWeather({ latitude, longitude, formatted }: Location, chann
       embed.setColor("#663399");
       embed.addField('Temperature', `${weather.currently.temperature}°F`, true)
       embed.addField('Humidity', `${Math.floor(weather.currently.humidity * 100)}%`, true)
+      embed.addField('High', `$(weather.daily.data[0].temperatureHigh}°F`, false)
       embed.addField('Conditions', weather.currently.summary, false)
       embed.addField('Forecast', weather.hourly.summary, false)
       channel.send('', { embed })
@@ -71,10 +72,11 @@ function retrieveLocation(str: string): Promise<void | Location> {
     return geocoder.geocode(query).then((location) => {
       if (location.length >= 1) {
         const loc = location[0];
+        const formatted = `${loc.city}, ${loc.state}, ${loc.zipcode}`;
         resolve({
           latitude: loc.latitude,
           longitude: loc.longitude,
-          formatted: loc.formattedAddress
+          formatted: formatted
         })
       } else {
         reject('No Geo results');
