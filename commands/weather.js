@@ -72,7 +72,7 @@ function buildAndSendWeather({ latitude, longitude, formatted }, channel) {
             embed.addField("Humidity", `${Math.floor(weather.currently.humidity * 100)}%`, true);
             embed.addField("Feels Like", `${weather.currently.apparentTemperature}°F`, true);
             embed.addField("High/Low", `${weather.daily.data[0].temperatureHigh}°F/${weather.daily.data[0].temperatureLow}°F`, false);
-            embed.addField("Conditions", `${iconMap.get(weather.currently.summary)} ${weather.currently.summary}`, true);
+            embed.addField("Conditions", `${iconMap.get(weather.currently.icon)} ${weather.currently.summary}`, true);
             embed.addField("Forecast", weather.hourly.summary, false);
             channel.send("", { embed });
         })

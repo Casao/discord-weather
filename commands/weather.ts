@@ -106,7 +106,7 @@ function buildAndSendWeather(
         );
         embed.addField(
           "Conditions",
-          `${iconMap.get(weather.currently.summary)} ${
+          `${iconMap.get(weather.currently.icon)} ${
             weather.currently.summary
           }`,
           true
