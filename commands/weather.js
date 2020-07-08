@@ -3,7 +3,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.WeatherCommand = void 0;
 const then_redis_1 = require("then-redis");
 const discord_js_1 = require("discord.js");
 const node_geocoder_1 = __importDefault(require("node-geocoder"));
@@ -54,7 +53,8 @@ function buildAndSendWeather({ latitude, longitude, formatted }, channel) {
             embed.setColor("#663399");
             embed.addField('Temperature', `${weather.currently.temperature}°F`, true);
             embed.addField('Humidity', `${Math.floor(weather.currently.humidity * 100)}%`, true);
-            embed.addField('High', `${weather.daily.data[0].temperatureHigh}°F`, false);
+            embed.addField('Feels Like', `${weather.currently.apparentTemperature}°F`, true);
+            embed.addField('High/Low', `${weather.daily.data[0].temperatureHigh}°F/${weather.daily.data[0].temperatureLow}°F`, false);
             embed.addField('Conditions', weather.currently.summary, false);
             embed.addField('Forecast', weather.hourly.summary, false);
             channel.send('', { embed });

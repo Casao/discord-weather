@@ -3,7 +3,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DecideCommand = void 0;
 const discord_js_1 = require("discord.js");
 const lodash_sample_1 = __importDefault(require("lodash.sample"));
 class DecideCommand {
