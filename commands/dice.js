@@ -26,8 +26,8 @@ class DiceCommand {
                 dieResults.push(lodash_random_1.default(1, size));
             });
             let expAvg = expectedAverage(size);
-            embed.addField(die, `**[**${dieResults.join(', ')}**]**
-      *Sum:* ${sum(dieResults) + plus}
+            embed.addField(sum(dieResults) + plus, `**[**${dieResults.join(', ')}**]**
+      *Formula:* ${die}
       *Average Result:* ${avg(dieResults).toPrecision(2)}
       *Expected Average:* ${expAvg}`);
         });
