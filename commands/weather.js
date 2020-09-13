@@ -3,6 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.WeatherCommand = void 0;
 const then_redis_1 = require("then-redis");
 const discord_js_1 = require("discord.js");
 const node_geocoder_1 = __importDefault(require("node-geocoder"));
@@ -30,7 +31,7 @@ const iconMap = new Map([
 ]);
 class WeatherCommand {
     shouldRun(message) {
-        return message.content.startsWith(".wz");
+        return message.content.toLowerCase().startsWith(".wz");
     }
     runCommand(message) {
         let channel = message.channel;

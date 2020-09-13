@@ -39,7 +39,7 @@ const iconMap = new Map([
 
 export class WeatherCommand implements BotCommand {
   shouldRun(message: Message): Boolean {
-    return message.content.startsWith(".wz");
+    return message.content.toLowerCase().startsWith(".wz");
   }
 
   runCommand(message: Message): void {

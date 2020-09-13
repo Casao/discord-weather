@@ -3,20 +3,21 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.DiceCommand = void 0;
 const discord_js_1 = require("discord.js");
 const lodash_times_1 = __importDefault(require("lodash.times"));
 const lodash_random_1 = __importDefault(require("lodash.random"));
 class DiceCommand {
     shouldRun(message) {
-        return message.content.startsWith('.roll') || message.content.startsWith('.dice');
+        return message.content.toLowerCase().startsWith('.roll') || message.content.toLowerCase().startsWith('.dice');
     }
     runCommand(message) {
-        const dice = message.content.match(/(?:\d+)?d(?:\d+)(?:\+\d+)?/g);
+        const dice = message.content.match(/(?:\d+)?d(?:\d+)(?:\+\d+)?/gi);
         const embed = new discord_js_1.RichEmbed();
         embed.setTitle("Dice Results");
         embed.setColor("#663399");
         dice.forEach(die => {
-            const split = die.match(/(\d+)?d(\d+)(\+\d+)?/);
+            const split = die.match(/(\d+)?d(\d+)(\+\d+)?/i);
             const quantity = Number(split[1]) || 1;
             const size = Number(split[2]);
             const plus = Number(split[3]) || 0;

@@ -5,7 +5,7 @@ import { BotCommand } from "./bot_command";
 
 export class DecideCommand implements BotCommand {
   shouldRun(message: Message): Boolean {
-    return message.content.startsWith('.decide');
+    return message.content.toLowerCase().startsWith('.decide');
   }
 
   runCommand(message: Message): void {
